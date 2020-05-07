@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import api from './services/api';
 
 import "./styles.css";
@@ -11,7 +11,7 @@ function App() {
 
     const response = await api.post('repositories', {
       title: `Repositório: ${ Date.now() }`,
-      url: "http://github.com.br/users/saulossg",
+      url: "https://github.com/saulossg",
       techs: ["NodeJS", "ReactJS", "React-Native"]
     })
 
@@ -21,16 +21,25 @@ function App() {
   }
 
   async function handleRemoveRepository(id) {
-    // TODO
+    await api.delete(`repositories/${id}`);
+    const indexRepository = repositories.findIndex(repository => repository.id === id);
+    repositories.splice(indexRepository, 1);
+    
+    setRepositories([ ...repositories ]);
   }
+
+  useEffect(() =>  {
+    api.get('repositories')
+      .then(response => setRepositories(response.data));
+  }, [])
 
   return (
     <div>
       <ul data-testid="repository-list">
       {repositories.map(repository => 
-        <li key={repository.title}>
+        <li key={repository.id}>
           { repository.title }
-          <button onClick={() => handleRemoveRepository(1)}>
+          <button onClick={() => handleRemoveRepository(repository.id)}>
             Remover
           </button>
         </li>
